@@ -28,6 +28,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Bridge\Twig\Mime\{TemplatedEmail, Email};
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
+use App\Entity\Address;
 
 class UserCrudController extends AbstractCrudController
 {
@@ -52,7 +53,12 @@ class UserCrudController extends AbstractCrudController
                     TextField::new('nickname', 'Prénoms')->setColumns(6),
                     //BooleanField::new('isVerified', 'Activer le compte'),
                     EmailField::new('email', 'Adresse email')->setColumns(6),
-                    ArrayField::new('roles')->setColumns(6)
+                    ArrayField::new('roles')->setColumns(6),
+                    AssociationField::new('agency', 'Agence')->setQueryBuilder(
+                        function (QueryBuilder $queryBuilder) {
+                        $queryBuilder->where('entity.active = true');
+                    })->setColumns(6),
+
                 ];
         
         $password = TextField::new('password')
@@ -112,23 +118,36 @@ class UserCrudController extends AbstractCrudController
        if (!$entityInstance instanceof User) return;
 
        $pass = $this->passbrut;
+       $to = $entityInstance->getEmail();
 
-       $msg = '<div>Votre compte a été crée: Login '. $entityInstance->getEmail().'<br/> Mot de passe :'.$pass.'</div>';
+       $subject = 'Inscription Web Auto Démarche';
+       $from = 'WebAutoDémarche';
+       
+       $headers[] = 'MIME-Version: 1.0';
+       $headers[] = 'Content-type: text/html; charset=iso-8859-1';
+       
+	   $message = "
+                   <html>
+                      <head>
+                          <title>$subject</title>
+                      </head>
+                      <body>
+                       		<p>Bonjour, votre inscription a bien été prise en compte !</p>
+                           <table>
+                              <tr>
+                                 <th>Login :</th>
+                                 <td>$to</td>
+                              </tr>
+                              <tr>
+                                 <th>Mot de passe :</th>
+                                 <td>$pass</td>
+                              </tr>
+                           </table>
+                      </body>
+                   </html>
+                   ";
 
-       //mail($entityInstance->getEmail(),"WebAutoDemarche - Accès de connexion",$msg);
-
-       function sendEmail(MailerInterface $mailer, $entityInstance, $pass)  {
-
-            $email = (new TemplatedEmail())
-                ->from('mail@mail.exemple')
-                ->to($entityInstance->getEmail())
-                ->subject('WebAutoDemarche - Accès de connexion')
-                ->html('<div>Votre compte a été crée: Login '. $entityInstance->getEmail().'<br/> Mot de passe :'.$pass.'</div>');
-
-            $mailer->send($email);
-
-            return $email;
-        }
+       mail($to, $subject, $message, implode("\r\n", $headers));
 
 
        parent::persistEntity($em, $entityInstance);

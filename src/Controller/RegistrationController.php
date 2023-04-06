@@ -15,6 +15,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
+use App\Entity\Agency;
 
 class RegistrationController extends AbstractController
 {
@@ -32,6 +33,9 @@ class RegistrationController extends AbstractController
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
         $roles = ['ROLE_SUPER_ADMIN'];
+        $agency_name = $request->get('_agency');
+
+        //dd($request->get('_agency'));
 
         if ($form->isSubmitted() && $form->isValid()) {
             // encode the plain password
@@ -41,7 +45,11 @@ class RegistrationController extends AbstractController
                     $form->get('plainPassword')->getData()
                 )
             );
+            $agency = new Agency;
+            $agency->setName($agency_name);
+            $agency->setActive(true);
 
+            $user->setAgency($agency);
             $user->setRoles($roles);
 
             $entityManager->persist($user);
@@ -68,7 +76,9 @@ class RegistrationController extends AbstractController
     #[Route('/inscription', name: 'app_sign_in')]
     public function signIn(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
-        $user = new User();
+        return $this->redirectToRoute('admin');
+
+        /*$user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
         $roles = ['ROLE_USER'];
@@ -102,7 +112,7 @@ class RegistrationController extends AbstractController
 
         return $this->render('registration/signin.html.twig', [
             'registrationForm' => $form->createView(),
-        ]);
+        ]);*/
     }
 
     #[Route('/verify/email', name: 'app_verify_email')]

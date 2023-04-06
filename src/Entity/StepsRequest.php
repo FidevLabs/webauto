@@ -26,13 +26,13 @@ class StepsRequest
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $file = null;
+    #[ORM\Column]
+    private array $file = [];
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $comment = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 0, nullable: true)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 0, nullable: true)]
     private ?string $price = null;
 
     #[ORM\ManyToOne(inversedBy: 'stepsRequests')]
@@ -41,6 +41,13 @@ class StepsRequest
     #[ORM\ManyToOne(inversedBy: 'stepsRequests')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Category $category = null;
+
+    #[ORM\ManyToOne(inversedBy: 'stepsRequests')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Agency $agency = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $reference = null;
 
     public function getId(): ?int
     {
@@ -95,12 +102,12 @@ class StepsRequest
         return $this;
     }
 
-    public function getFile(): ?string
+    public function getFile(): array
     {
         return $this->file;
     }
 
-    public function setFile(?string $file): self
+    public function setFile(array $file): self
     {
         $this->file = $file;
 
@@ -151,6 +158,30 @@ class StepsRequest
     public function setCategory(?Category $category): self
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getAgency(): ?Agency
+    {
+        return $this->agency;
+    }
+
+    public function setAgency(?Agency $agency): self
+    {
+        $this->agency = $agency;
+
+        return $this;
+    }
+
+    public function getReference(): ?string
+    {
+        return $this->reference;
+    }
+
+    public function setReference(?string $reference): self
+    {
+        $this->reference = $reference;
 
         return $this;
     }
