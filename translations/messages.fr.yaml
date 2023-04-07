@@ -1,6 +1,6 @@
 StepsRequest: Démarches
 
-Create StepsRequest: Créer une demande 
+Create StepsRequest: Nouvelle une demande 
 
 CreatedAt: Créer le
 
@@ -29,3 +29,5 @@ Password: Mot de passe
 Agree terms: Accepter
 
 Agency: Agence
+
+Address:  Adresse

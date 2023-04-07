@@ -3,7 +3,7 @@
 namespace App\Controller\Admin;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
-use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
+use EasyCorp\Bundle\EasyAdminBundle\Config\{MenuItem, Crud};
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -28,6 +28,8 @@ class DashboardController extends AbstractDashboardController
 
         return $this->redirect($url);
 
+        //return parent::index();
+
     }
 
     public function configureDashboard(): Dashboard
@@ -36,9 +38,22 @@ class DashboardController extends AbstractDashboardController
             ->setTitle('<img src="/picto/webauto_logo.png" alt="Logo" />');
     }
 
+    public function configureCrud(): Crud
+    {
+        return Crud::new()
+
+                ->setPaginatorPageSize(15)
+                // the number of pages to display on each side of the current page
+                // e.g. if num pages = 35, current page = 7 and you set ->setPaginatorRangeSize(4)
+                // the paginator displays: [Previous]  1 ... 3  4  5  6  [7]  8  9  10  11 ... 35  [Next]
+                // set this number to 0 to display a simple "< Previous | Next >" pager
+                ->setPaginatorRangeSize(7);
+
+    }
+
     public function configureMenuItems(): iterable
     {
-        yield MenuItem::linkToDashboard('Tableau de bord', 'fa fa-dashboard');
+        yield MenuItem::linkToDashboard('Tableau de bord', 'fa fa-dashboard')->setPermission('ROLE_ADMIN');
 
         yield MenuItem::linkToCrud('Catégorie de demande', 'fa fa-list', Category::class)->setPermission('ROLE_SUPER_ADMIN');
 
@@ -55,6 +70,7 @@ class DashboardController extends AbstractDashboardController
                 MenuItem::linkToRoute('Demandes client', 'fa fa-list', 'app_steps'),
                 MenuItem::linkToCrud('Adresse email', 'fa fa-address-card', Address::class)->setPermission('ROLE_SUPER_ADMIN')
         ])->setPermission('ROLE_ADMIN');
+
 
 
         // yield MenuItem::linkToCrud('The Label', 'fas fa-list', EntityClass::class);

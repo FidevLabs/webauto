@@ -7,6 +7,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityUpdatedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use App\Entity\{Product, Category, StepsRequest, Agency, Address};
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
 use Symfony\Component\Security\Core\Security;
 
 class AdminSubscriber implements  EventSubscriberInterface {
@@ -20,6 +21,7 @@ class AdminSubscriber implements  EventSubscriberInterface {
         return [
             BeforeEntityPersistedEvent::class => ['setCreatedAt'],
             BeforeEntityUpdatedEvent::class => ['setUpdatedAt'],
+            AfterEntityUpdatedEvent::class => ['setReference'],
         ];
 
     }
@@ -46,22 +48,84 @@ class AdminSubscriber implements  EventSubscriberInterface {
 
     public function setUpdatedAt(BeforeEntityUpdatedEvent $event) {
 
-        $emailAdmin = $this->entityManager->getRepository(Address::class)->findOneByIsActived(1);
-
         $entityInstance = $event->getEntityInstance();
 
         if (!$entityInstance instanceof Product && !$entityInstance instanceof Category && !$entityInstance instanceof StepsRequest ) return;
 
-        $this->sendMail(
-            $entityInstance->getFile(), 
-            'Bonjour, une mise jour a été déposée par '.$entityInstance->getName(),
-            'Demande :'.$entityInstance->getCategory()->getName(),
-            $emailAdmin->getEmail()
-        );  
-
-        if ($entityInstance instanceof Product || $entityInstance instanceof Category) {
+        if ($entityInstance instanceof Product && $entityInstance instanceof Category) {
             $entityInstance->setUpdatedAt(new \DateTimeImmutable());
         }
+    }
+
+
+    public function setReference(AfterEntityUpdatedEvent $event) {
+        $entityInstance = $event->getEntityInstance();
+
+        if ($entityInstance instanceof StepsRequest) {
+
+            //dd($entityInstance);
+
+                ($entityInstance->getReference()) ? $reference = $entityInstance->getReference(): $reference = 'Pas encore attribué';
+
+                $destinataire = $entityInstance->getEmail();
+
+                $subject = 'Notification du dossier :'.$entityInstance->getCategory()->getName();;
+                
+                $headers[] = 'MIME-Version: 1.0';
+                $headers[] = 'Content-type: text/html; charset=iso-8859-1';
+                
+                $message = '
+                            <html>
+                                <head>
+                                    <title>'.$subject.'</title>
+                                </head>
+                                <body>
+                                    <div style="font-size: 1.1em">
+                                        Bonjour, une mise à jour a été effectuée sur le dossier.<br/>
+
+                                        <br/>
+
+                                        Détails du dossier :
+                                    </div>
+
+                                    <br/>
+                                    <div>
+                                        <table class="table">
+                                            <tr>
+                                                <th style="font-size: 1.1em">Intitulé :</th>
+                                                <td class="text-bold" style="font-size: 1.1em">'.$entityInstance->getName().'</td>
+                                            </tr>
+                                            <tr>
+                                                <th style="font-size: 1.1em">Numéro de demande :</th>
+                                                <td class="text-bold" style="font-size: 1.1em"><mark>'.$reference.'</mark></td>
+                                            </tr>
+                                            <tr>
+                                                <th style="font-size: 1.1em">Date d\'émission :</th>
+                                                <td class="text-bold" style="font-size: 1.1em">'.date_format($entityInstance->getCreatedAt(), 'd-m-Y H:i:s' ).'</td>
+                                            </tr>
+                                            <tr>
+                                                <th style="font-size: 1.1em">Type de demande :</th>
+                                                <td style="font-size: 1.1em" class="text-bold">'.$entityInstance->getName().'</td>
+                                            </tr>
+                                            <tr>
+                                                <th style="font-size: 1.1em">Prix :</th>
+                                                <td style="font-size: 1.1em" class="text-bold">'.$entityInstance->getPrice().'</td>
+                                            </tr>                                        
+                                        </table>
+
+                                            Merci de prendre contact avec l\'agence pour plus d\'informations.
+
+                                        <br/><br/>
+                                        Cordialement.                                    
+                                    </p>
+                                    <br/>                                
+                                </body>
+                            </html>
+                            ';
+
+                mail($destinataire, $subject, $message, implode("\r\n", $headers));
+        }
+
     }
 
 
@@ -74,7 +138,7 @@ class AdminSubscriber implements  EventSubscriberInterface {
                             ): void {
 
         //permet de définir les différentes parties du mail
-        $limite = "----=_Part_" . md5( uniqid ( rand() ) );
+        $limite = "----=_Part_" . md5(uniqid(microtime(), TRUE));
 
         //headers du mail 
         $mail_mime  = "MIME-Version: 1.0\r\n"; 

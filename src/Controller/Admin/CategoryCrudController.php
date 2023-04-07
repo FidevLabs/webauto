@@ -6,11 +6,7 @@ use App\Entity\Category;
 use App\Entity\Product;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use Doctrine\ORM\EntityManagerInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\ColorField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\{IdField, TextField, BooleanField, DateTimeField, ColorField};
 
 class CategoryCrudController extends AbstractCrudController
 {
@@ -19,16 +15,16 @@ class CategoryCrudController extends AbstractCrudController
         return Category::class;
     }
 
-    
+        
     public function configureFields(string $pageName): iterable
     {
         return [
-            IdField::new('id')->hideOnForm(),
+            IdField::new('id')->hideOnForm()->hideOnDetail(),
             TextField::new('name', 'Titre'),
             ColorField::new('color', 'Couleur'),
-            BooleanField::new('active', 'Afficher'),            
-            DateTimeField::new('updatedAt', 'modifié le')->hideOnForm(),
-            DateTimeField::new('createdAt', 'Créer le')->hideOnForm(),
+            BooleanField::new('active', 'Disponible'),            
+            DateTimeField::new('updatedAt', 'modifié le')->hideOnForm()->hideOnDetail(),
+            DateTimeField::new('createdAt', 'Créer le')->hideOnForm()->hideOnDetail(),
         ];
     }
 

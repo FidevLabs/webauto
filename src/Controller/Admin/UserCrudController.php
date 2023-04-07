@@ -61,16 +61,17 @@ class UserCrudController extends AbstractCrudController
 
                 ];
         
-        $password = TextField::new('password')
+        $password = TextField::new('password' )
             ->setFormType(RepeatedType::class)
             ->setFormTypeOptions([
                 'type' => PasswordType::class,
-                'first_options' => ['label' => 'Password'],
-                'second_options' => ['label' => '(Repeat)'],
+                'first_options' => ['label' => 'Mot de passe'],
+                'second_options' => ['label' => 'Retapez'],
                 'mapped' => false,
             ])
             ->setRequired($pageName === Crud::PAGE_NEW)
             ->onlyOnForms()
+            ->setColumns(6)
             ;
         $fields[] = $password;
 

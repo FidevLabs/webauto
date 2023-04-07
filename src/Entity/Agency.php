@@ -27,10 +27,18 @@ class Agency
     #[ORM\OneToMany(mappedBy: 'agency', targetEntity: User::class)]
     private Collection $users;
 
+    #[ORM\OneToMany(mappedBy: 'agency', targetEntity: Address::class, orphanRemoval: true)]
+    private Collection $addresses;
+
+    #[ORM\OneToMany(mappedBy: 'agency', targetEntity: ClientMessage::class, orphanRemoval: true)]
+    private Collection $clientMessages;
+
     public function __construct()
     {
         $this->stepsRequests = new ArrayCollection();
         $this->users = new ArrayCollection();
+        $this->addresses = new ArrayCollection();
+        $this->clientMessages = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -124,5 +132,65 @@ class Agency
 
     public function __toString() {
         return $this->name;
+    }
+
+    /**
+     * @return Collection<int, Address>
+     */
+    public function getAddresses(): Collection
+    {
+        return $this->addresses;
+    }
+
+    public function addAddress(Address $address): self
+    {
+        if (!$this->addresses->contains($address)) {
+            $this->addresses->add($address);
+            $address->setAgency($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAddress(Address $address): self
+    {
+        if ($this->addresses->removeElement($address)) {
+            // set the owning side to null (unless already changed)
+            if ($address->getAgency() === $this) {
+                $address->setAgency(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ClientMessage>
+     */
+    public function getClientMessages(): Collection
+    {
+        return $this->clientMessages;
+    }
+
+    public function addClientMessage(ClientMessage $clientMessage): self
+    {
+        if (!$this->clientMessages->contains($clientMessage)) {
+            $this->clientMessages->add($clientMessage);
+            $clientMessage->setAgency($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClientMessage(ClientMessage $clientMessage): self
+    {
+        if ($this->clientMessages->removeElement($clientMessage)) {
+            // set the owning side to null (unless already changed)
+            if ($clientMessage->getAgency() === $this) {
+                $clientMessage->setAgency(null);
+            }
+        }
+
+        return $this;
     }
 }

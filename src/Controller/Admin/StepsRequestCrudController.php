@@ -4,16 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\StepsRequest;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TelephoneField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\{NumberField, ImageField, AssociationField, TextField, TextEditorField, BooleanField, DateTimeField, MoneyField, IntegerField, IdField, TelephoneField, EmailField, };
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
 use Symfony\Component\Security\Core\Security;
@@ -38,12 +29,11 @@ class StepsRequestCrudController extends AbstractCrudController
         $this->security = $security;
     }
 
+    
+
     public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
 {      
-
-        //dd($this->getUser()->getAgency());
-
-        if ($this->getUser()->getRoles() == array('ROLE_USER')) {
+        if ($this->getUser()->getRoles() == array('ROLE_USER') || $this->getUser()->getRoles() == array('ROLE_ADMIN')) {
             return parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters)
                 ->andWhere('entity.agency = :agency')
                 ->setParameter('agency', $this->getUser()->getAgency());
@@ -75,9 +65,9 @@ class StepsRequestCrudController extends AbstractCrudController
         return [
 
             //IdField::new('id')->hideOnForm(),
-            TextField::new('name', 'Intitulé/Société')->setColumns(6),
+            TextField::new('name', 'Nom et Prénoms/Société')->setColumns(6),
 
-            TelephoneField::new('phone', 'Contact')->setColumns(6)->hideOnIndex(),
+            TelephoneField::new('phone', 'Téléphone :')->setColumns(6)->hideOnIndex(),
 
             EmailField::new('email', 'Adresse email')->setColumns(6),
 
@@ -103,8 +93,7 @@ class StepsRequestCrudController extends AbstractCrudController
 
             DateTimeField::new('createdAt','Date')->hideOnForm(),
 
-            MoneyField::new('price', 'Coût')
-                        ->setCurrency('EUR')
+            IntegerField::new('price', 'Facturation')
                         ->onlyOnIndex(),
 
             AssociationField::new('state')->setQueryBuilder(
@@ -119,11 +108,11 @@ class StepsRequestCrudController extends AbstractCrudController
         
         return [
                 //IdField::new('id')->hideOnForm(),
-                TextField::new('name', 'Intitulé/Société')->setColumns(6),
+                TextField::new('name', 'Nom et Prénoms/Société')->setColumns(6),
 
-                TelephoneField::new('phone', 'Contact')->setColumns(6)->hideOnIndex(),
+                TelephoneField::new('phone', 'Téléphone')->setColumns(6)->hideOnIndex(),
 
-                EmailField::new('email', 'E-mail')->setColumns(6),               
+                EmailField::new('email', 'Adresse email')->setColumns(6),               
 
                 AssociationField::new('category', 'Type')->setQueryBuilder(
                                     function (QueryBuilder $queryBuilder) {
@@ -145,9 +134,7 @@ class StepsRequestCrudController extends AbstractCrudController
 
                 DateTimeField::new('createdAt', 'Date d\'entrée')->hideOnForm(),
 
-                MoneyField::new('price', 'Facturation')
-                            ->setCurrency('EUR')
-                            ->setColumns(6),
+                NumberField::new('price', 'Facturation'),
                             //->setPermission('ROLE_ADMIN'),
 
                 AssociationField::new('state', 'Etat du dossier')->setQueryBuilder(
