@@ -42,6 +42,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinColumn(nullable: false)]
     private ?Agency $agency = null;
 
+    #[ORM\ManyToOne(inversedBy: 'user')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Actor $actor = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -156,6 +160,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setAgency(?Agency $agency): self
     {
         $this->agency = $agency;
+
+        return $this;
+    }
+
+    public function getActor(): ?Actor
+    {
+        return $this->actor;
+    }
+
+    public function setActor(?Actor $actor): self
+    {
+        $this->actor = $actor;
 
         return $this;
     }

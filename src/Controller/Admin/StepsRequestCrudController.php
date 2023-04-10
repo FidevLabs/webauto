@@ -11,7 +11,6 @@ use Symfony\Component\Security\Core\Security;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use Doctrine\ORM\QueryBuilder;
@@ -45,7 +44,6 @@ class StepsRequestCrudController extends AbstractCrudController
 
     public static function getEntityFqcn(): string
     {
-        //dd('test');
 
             return StepsRequest::class;
 
@@ -56,56 +54,7 @@ class StepsRequestCrudController extends AbstractCrudController
     {
 
         $user = $this->security->getUser();
-
-        //dd();
-
-    if ($user->getRoles() == array('ROLE_USER')) {
-
-        
-        return [
-
-            //IdField::new('id')->hideOnForm(),
-            TextField::new('name', 'Nom et Prénoms/Société')->setColumns(6),
-
-            TelephoneField::new('phone', 'Téléphone :')->setColumns(6)->hideOnIndex(),
-
-            EmailField::new('email', 'Adresse email')->setColumns(6),
-
-            AssociationField::new('category', 'Type')->setQueryBuilder(
-                                function (QueryBuilder $queryBuilder) {
-                                $queryBuilder->where('entity.active = true');
-                            })->setColumns(6),
-
-            AssociationField::new('agency', 'Agence')->setQueryBuilder(
-                                function (QueryBuilder $queryBuilder) {
-                                $queryBuilder->where('entity.active = true');
-                            })->onlyOnIndex()->setColumns(6),
-
-            ImageField::new('file', 'Dossier en (pdf)')
-                        ->setUploadDir(self::DOCS_UPLOAD_DIR)
-                        ->setBasePath(self::DOCS_BASE_PATH)                        
-                        ->setUploadedFileNamePattern('[year]-[month]-[day]-[contenthash].[extension]')
-                        ->setFormTypeOption('multiple', true)
-                        ->setRequired(false)
-                        ->setSortable(false)->hideOnIndex()->setColumns(6),
-                
-            TextEditorField::new('comment', 'Ajouter un commentaire')->onlyOnDetail(),
-
-            DateTimeField::new('createdAt','Date')->hideOnForm(),
-
-            IntegerField::new('price', 'Facturation')
-                        ->onlyOnIndex(),
-
-            AssociationField::new('state')->setQueryBuilder(
-                function (QueryBuilder $queryBuilder) {
-                $queryBuilder->where('entity.active = true');
-            })->onlyOnIndex()
             
-            
-        ];
-
-    } else {
-        
         return [
                 //IdField::new('id')->hideOnForm(),
                 TextField::new('name', 'Nom et Prénoms/Société')->setColumns(6),
@@ -134,18 +83,17 @@ class StepsRequestCrudController extends AbstractCrudController
 
                 DateTimeField::new('createdAt', 'Date d\'entrée')->hideOnForm(),
 
-                NumberField::new('price', 'Facturation'),
+                NumberField::new('price', 'Facturation')->hideWhenCreating(),
                             //->setPermission('ROLE_ADMIN'),
 
                 AssociationField::new('state', 'Etat du dossier')->setQueryBuilder(
                     function (QueryBuilder $queryBuilder) {
                     $queryBuilder->where('entity.active = true');
-                })->setColumns(6),
+                })->onlyWhenUpdating()->setColumns(6),
 
                 //TextEditorField::new('comment', 'Ajouter un commentaire')->hideOnForm()->setColumns(6),
         ];
 
-    }
 
 }
 

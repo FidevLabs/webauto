@@ -59,6 +59,9 @@ class UserCrudController extends AbstractCrudController
                         $queryBuilder->where('entity.active = true');
                     })->setColumns(6),
 
+                    AssociationField::new('actor', 'Type de personne')
+                                    ->setColumns(6),
+
                 ];
         
         $password = TextField::new('password' )

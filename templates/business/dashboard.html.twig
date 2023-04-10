@@ -1,0 +1,246 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+
+{% block page_title 'Dashboard' %}
+
+{% block content_title '' %}
+
+
+{% block main %}    
+        <style>
+            {#category {width: 435px !important;height: 235px !important}
+            #steps_request {width: 500px !important;height: 300px !important}#}
+        </style>
+        <div class="container-fluid p-0 mb-5">
+
+            <div class="row mb-2 mb-xl-3">
+                <div class="col-auto d-none d-sm-block">
+                    <h3>Tableau de bord <strong>analytique</strong></h3>
+                </div>
+
+                {#<div class="col-auto ms-auto text-end mt-n1">
+                    <a href="#" class="btn btn-light bg-white me-2">Invite a Friend</a>
+                    <a href="#" class="btn btn-primary">New Project</a>
+                </div>#}
+            </div>
+            
+            <div class="row mb-5">
+                <div class="col-xl-6 col-xxl-5 d-flex">
+                    <div class="w-100">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col mt-0">
+                                                <h5 class="card-title text-dark"><i class="fa fa-folder"></i> Dossiers non traités</a></h5>
+                                            </div>
+
+                                            <div class="col-auto">
+                                                <div class="stat text-primary">
+                                                    <i class="align-middle" data-feather="truck"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h1 class="mt-1 mb-3 text-info">{{ new_request|length }}</h1>
+                                        <div class="mb-0">
+                                            <span class="badge badge-primary"> <i class="mdi mdi-arrow-bottom-right"></i> -3.65% </span>
+                                            <span class="text-muted">Since last week</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col mt-0">
+                                                <h5 class="card-title text-dark"><i class="fa fa-users"></i> Clients enregistrés</h5>
+                                            </div>
+                                            <div class="col-auto">
+                                                <div class="stat text-primary">
+                                                    <i class="align-middle" data-feather="users"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h1 class="mt-1 mb-3 text-warning">{{ customs|length }}</h1>
+                                        <div class="mb-0">
+                                            <span class="badge badge-success"> <i class="mdi mdi-arrow-bottom-right"></i> 5.25% </span>
+                                            <span class="text-muted">Since last week</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col mt-0">
+                                                <h5 class="card-title text-dark"><i class="fa fa-folder-open text-success"></i> Dossiers traités</h5>
+                                            </div>
+
+                                            <div class="col-auto">
+                                                <div class="stat text-primary">
+                                                    <i class="align-middle" data-feather="dollar-sign"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h1 class="mt-1 mb-3 text-info">$21.300</h1>
+                                        <div class="mb-0">
+                                            <span class="badge badge-success"> <i class="mdi mdi-arrow-bottom-right"></i> 6.65% </span>
+                                            <span class="text-muted">Since last week</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card ">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col mt-0">
+                                                <h5 class="card-title text-dark"><i class="fa fa-folder-open text-warning"></i> Dossiers en cours</h5>
+                                            </div>
+
+                                            <div class="col-auto">
+                                                <div class="stat text-primary">
+                                                    <i class="align-middle" data-feather="shopping-cart"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <h1 class="mt-1 mb-3 text-dark">{{ current_request|length }} </h1>
+                                        <div class="mb-0">
+                                            <span class="badge badge-danger"> <i class="mdi mdi-arrow-bottom-right"></i> -2.25% </span>
+                                            <span class="text-muted">Since last week</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-6 col-xxl-7">
+                    <div class="card flex-fill w-100">
+                        <div class="card-header">
+                            {#<div class="float-end">
+                                <form class="row g-2">
+                                    <div class="col-auto">
+                                        <select class="form-select form-select-sm bg-light border-0">
+                                            <option>Jan</option>
+                                            <option value="1">Feb</option>
+                                            <option value="2">Mar</option>
+                                            <option value="3">Apr</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="text" class="form-control form-control-sm bg-light rounded-2 border-0" style="width: 100px;"
+                                            placeholder="Search..">
+                                    </div>
+                                </form>
+                            </div>#}
+                            <h5 class="card-title mb-0 text-dark"><i class="fa fa-bar-chart"></i> Demande par catégorie</h5>
+                        </div>
+                        <div class="card-body pt-2 pb-3">
+                            <div class="chart chart-sm text-center">
+                                <canvas id="category"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </div> 
+
+            <div class="row">
+                <div class="col-xl-12 col-xxl-12">
+                    <div class="card flex-fill w-100">
+                        <div class="card-header">
+                            {#<div class="float-end">
+                                <form class="row g-2">
+                                    <div class="col-auto">
+                                        <select class="form-select form-select-sm bg-light border-0">
+                                            <option>Jan</option>
+                                            <option value="1">Feb</option>
+                                            <option value="2">Mar</option>
+                                            <option value="3">Apr</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="text" class="form-control form-control-sm bg-light rounded-2 border-0" style="width: 100px;"
+                                            placeholder="Search..">
+                                    </div>
+                                </form>
+                            </div>#}
+                            <h5 class="card-title mb-0 text-dark"><i class="fa fa-folder"></i> Liste des demandes non traitées</h5>
+                        </div>
+                        <div class="card-body pt-2 pb-3">
+                            <div class="chart chart-sm">
+                                {# <canvas id="steps_request"></canvas> #}
+                                <table class="table table-bordered table-hover">
+                                        <tr>
+                                            <th>Nom et Prénoms/Société</th>
+                                            <th>Adresse email</th>
+                                            <th>type de demande</th>
+                                            <th>Etat de la demande</th>
+                                            <th>Date de soumission</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    {% for request in current_request %}
+                                        <tr>
+                                            <td>{{ request.name }}</td>
+                                            <td>{{ request.email }}</td>
+                                            <td>{{ request.category.name }}</td>
+                                            <td>{% if request.state %}<span style="{{ request.state.color}}">{{ request.state.title }}</span>{% else %}<span class="badge badge-warning">En attente</span>{% endif %}</td>
+                                            <td>{{ request.createdAt|date('d/m/Y h:i:s') }}</td>
+                                            <td>
+                                                <a href="#">Voir détails</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+{% endblock %}
+
+{% block body_javascript %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let category = document.querySelector('#category')
+        let categoryChart = new Chart(category, {
+            type: 'line',
+            data: {
+                labels: {{ categNom|raw }},
+                datasets: [{
+                    label: 'Repartition par categories',
+                    data: {{ categCount|raw }},
+                    fill: true,
+                    backgroundColor: {{ categColor|raw }}
+
+                }]
+            }
+        })
+
+        let steps_request = document.querySelector('#steps_request')
+        let stepsChart = new Chart(steps_request, {
+            type: 'bar',
+            data: {
+                labels: {{ dates|raw }},
+                datasets: [{
+                    label: 'Repartition par date du jour',
+                    data: {{ stepsCount|raw }},
+
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        })
+    </script>
+{% endblock %}

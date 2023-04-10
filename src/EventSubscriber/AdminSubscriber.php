@@ -29,18 +29,28 @@ class AdminSubscriber implements  EventSubscriberInterface {
 
     public function setCreatedAt(BeforeEntityPersistedEvent $event) {
 
-        $emailAdmin = $this->entityManager->getRepository(Address::class)->findOneByIsActived(1);
-
         $entityInstance = $event->getEntityInstance();
 
         if (!$entityInstance instanceof Product && !$entityInstance instanceof Category && !$entityInstance instanceof StepsRequest ) return;
 
-        $this->sendMail(
-                    $entityInstance->getFile(), 
-                    'Bonjour, une nouvelle demande a été déposée par '.$entityInstance->getName(),
-                    'Demande :'.$entityInstance->getCategory()->getName(),
-                    $emailAdmin->getEmail()
-                );
+        if ($entityInstance instanceof StepsRequest) {
+            
+            $emailAdmin = $this->entityManager->getRepository(Address::class)->findOneByAgenceId($this->getUser()->getAgency());
+
+            $destinataires = $emailAdmin;
+            $subject = 'Demande :'.$entityInstance->getCategory()->getName();
+
+            $this->sendMail(
+                        $entityInstance->getFile(), 
+                        'Bonjour, une nouvelle demande a été déposée par '.$entityInstance->getName(),
+                        $subject,
+                        $destinataires
+                    );
+            
+            $body = 'Vos dossier ont été ajoutés et est sont en attente d’approbation par les agents. <br/> Merci de rester en contact !';
+            // Email pour le client
+            mail($entityInstance->getName(), $subject, $body);
+        }
 
         $entityInstance->setCreatedAt(new \DateTimeImmutable());
     }
