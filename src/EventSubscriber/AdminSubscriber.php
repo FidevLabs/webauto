@@ -6,15 +6,19 @@ use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityPersistedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityUpdatedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use App\Entity\{Product, Category, StepsRequest, Agency, Address};
+use App\Service\ZipFile;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
+use Symfony\Component\BrowserKit\Response;
 use Symfony\Component\Security\Core\Security;
 
 class AdminSubscriber implements  EventSubscriberInterface {
 
     public const PATH_DOCS = 'uploads/images/docs/';
 
-    public function __construct(private Security $security, private EntityManagerInterface $entityManager){}
+    public const PATH_ZIP = 'uploads/zip/';
+
+    public function __construct( private ZipFile $zip, private Security $security, private EntityManagerInterface $entityManager){}
 
     public static function getSubscribedEvents() {
 
@@ -34,10 +38,16 @@ class AdminSubscriber implements  EventSubscriberInterface {
         if (!$entityInstance instanceof Product && !$entityInstance instanceof Category && !$entityInstance instanceof StepsRequest ) return;
 
         if ($entityInstance instanceof StepsRequest) {
-            
-            $emailAdmin = $this->entityManager->getRepository(Address::class)->findOneByAgenceId($this->getUser()->getAgency());
 
-            $destinataires = $emailAdmin;
+            $zip_name = microtime(true);
+
+            $this->ziperFile($entityInstance->getFile(), self::PATH_ZIP.$zip_name.'.gz');
+
+            $entityInstance->setArchive($zip_name);
+
+            $emailAdmin = $this->entityManager->getRepository(Address::class)->findOneByAgency($this->security->getUser()->getAgency());
+
+            $destinataires = $emailAdmin->getEmail();
             $subject = 'Demande :'.$entityInstance->getCategory()->getName();
 
             $this->sendMail(
@@ -65,6 +75,17 @@ class AdminSubscriber implements  EventSubscriberInterface {
         if ($entityInstance instanceof Product && $entityInstance instanceof Category) {
             $entityInstance->setUpdatedAt(new \DateTimeImmutable());
         }
+
+        if ($entityInstance instanceof StepsRequest) {
+
+            $step_req = $this->entityManager->getRepository(StepsRequest::class)->find($entityInstance->getId());
+
+            if ( $step_req->getArchive() == null && $entityInstance->getFile() != null ) {
+                $zip_name = uniqid('file'.$entityInstance->getId().'-');
+                $this->ziperFile($entityInstance->getFile(), self::PATH_ZIP.$zip_name.'.gz');
+                $entityInstance->setArchive($zip_name.'.gz');
+            }
+        }
     }
 
 
@@ -72,8 +93,6 @@ class AdminSubscriber implements  EventSubscriberInterface {
         $entityInstance = $event->getEntityInstance();
 
         if ($entityInstance instanceof StepsRequest) {
-
-            //dd($entityInstance);
 
                 ($entityInstance->getReference()) ? $reference = $entityInstance->getReference(): $reference = 'Pas encore attribué';
 
@@ -119,7 +138,7 @@ class AdminSubscriber implements  EventSubscriberInterface {
                                             </tr>
                                             <tr>
                                                 <th style="font-size: 1.1em">Prix :</th>
-                                                <td style="font-size: 1.1em" class="text-bold">'.$entityInstance->getPrice().'</td>
+                                                <td style="font-size: 1.1em" class="text-bold">'.$entityInstance->getPrice().' €</td>
                                             </tr>                                        
                                         </table>
 
@@ -245,4 +264,26 @@ class AdminSubscriber implements  EventSubscriberInterface {
         }
 
     }
+
+
+    public function ziperFile($files, $pathfile): void {
+
+        $i = 0 ;
+
+        while ( count( $files ) > $i )   {
+            $fo = fopen(self::PATH_DOCS.$files[$i],'r') ; //on ouvre le fichier
+            $contenu = fread($fo, filesize(self::PATH_DOCS.$files[$i])) ; //on enregistre le contenu
+            fclose($fo) ; //on ferme fichier
+            $this->zip->addfile($contenu, $files[$i]) ; //on ajoute le fichier
+            $i++; //on incrémente i
+        }
+
+        $archive = $this->zip->file() ; // on associe l'archive
+        // on enregistre l'archive dans un fichier
+        $open = fopen( $pathfile , "wb");
+        fwrite($open, $archive);
+        fclose($open);
+
+    }
+
 }

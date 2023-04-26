@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Controller\BusinessController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\{MenuItem, Crud};
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
@@ -11,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Symfony\UX\Chartjs\Model\Chart;
-use App\Entity\{StepsRequest, Category, State, User, ClientMessage, Agency, Address};
+use App\Entity\{Payment, StepsRequest, Category, State, User, ClientMessage, Agency, Address};
 
 class DashboardController extends AbstractDashboardController
 {
@@ -21,14 +22,19 @@ class DashboardController extends AbstractDashboardController
 
     #[Route('/{_locale}/admin', name: 'admin', requirements: ['_locale' => 'fr'])]
     public function index(): Response
-    {
-        $url = $this->adminUrlGenerator
-                    ->setController(StepsRequestCrudController::class)
-                    ->generateUrl();
+    {    
+            if (in_array('ROLE_SUPER_ADMIN', $this->getUser()->getRoles()))  {
+                $url = $this->adminUrlGenerator
+                            ->setRoute('app_dashboard')
+                            ->generateUrl();
+            }
 
-        return $this->redirect($url);
+            $url = $this->adminUrlGenerator
+                          ->setController(StepsRequestCrudController::class)
+                          ->generateUrl();
 
-        //return parent::index();
+                        
+            return $this->redirect($url);        
 
     }
 
@@ -53,23 +59,28 @@ class DashboardController extends AbstractDashboardController
 
     public function configureMenuItems(): iterable
     {
-        yield MenuItem::linkToRoute('Tableau de bord', 'fa fa-dashboard', 'app_dashboard')->setPermission('ROLE_ADMIN');
+        yield MenuItem::linkToRoute('Tableau de bord', 'fa fa-dashboard text-danger', 'app_dashboard')->setPermission('ROLE_SUPER_ADMIN');
 
-        yield MenuItem::linkToCrud('Catégorie de demande', 'fa fa-list', Category::class)->setPermission('ROLE_SUPER_ADMIN');
+        yield MenuItem::subMenu('Demandes', 'fa fa-paperclip text-info')->setSubItems([
+            MenuItem::linkToCrud('Liste', 'fa fa-list', StepsRequest::class),            
+            MenuItem::linkToCrud('Catégorie', 'fa fa-tag', Category::class)->setPermission('ROLE_SUPER_ADMIN'),
+            MenuItem::linkToRoute('Gestion', 'fa fa-sliders', 'app_steps')->setPermission('ROLE_SUPER_ADMIN'),
+        ]);
 
-        yield MenuItem::linkToCrud('Liste des demandes', 'fa fa-tasks', StepsRequest::class);
+        yield MenuItem::linkToCrud('Les agences', 'fa fa-handshake-o text-warning', Agency::class)->setPermission('ROLE_ADMIN');
 
-        yield MenuItem::linkToCrud('Les agences', 'fa fa-handshake-o', Agency::class)->setPermission('ROLE_ADMIN');
+        //yield MenuItem::linkToRoute('Statistiques', 'fa fa-bar-chart', 'app_business')->setPermission('ROLE_SUPER_ADMIN');
 
-        yield MenuItem::linkToRoute('Statistiques', 'fa fa-bar-chart', 'app_business')->setPermission('ROLE_SUPER_ADMIN');
+        yield MenuItem::linkToCrud('Liste des états', 'fa fa-eye text-dark', State::class)->setPermission('ROLE_SUPER_ADMIN');
+        yield MenuItem::linkToCrud('Comptes', 'fa fa-users text-success', User::class)->setPermission('ROLE_SUPER_ADMIN');
+        
+        yield MenuItem::linkToCrud('Moyen de paiement', 'fa fa-money-bill', Payment::class)->setPermission('ROLE_SUPER_ADMIN');
 
-        yield MenuItem::subMenu('Paramètres', 'fa fa-gear')->setSubItems([
-                MenuItem::linkToCrud('Liste des états', 'fa fa-eye', State::class)->setPermission('ROLE_SUPER_ADMIN'),
-                MenuItem::linkToCrud('Comptes', 'fa fa-users', User::class)->setPermission('ROLE_SUPER_ADMIN'),
-                MenuItem::linkToCrud('Message client', 'fa fa-message', ClientMessage::class)->setPermission('ROLE_SUPER_ADMIN'),
-                MenuItem::linkToRoute('Demandes client', 'fa fa-list', 'app_steps'),
-                MenuItem::linkToCrud('Adresse email', 'fa fa-address-card', Address::class)->setPermission('ROLE_SUPER_ADMIN')
-        ])->setPermission('ROLE_ADMIN');
+        yield MenuItem::subMenu('Paramètres', 'fa fa-cogs text-dark')->setSubItems([
+            MenuItem::linkToCrud('Message aux clients', 'fa fa-envelope', ClientMessage::class),
+            MenuItem::linkToCrud('Email d\'agence', 'fa fa-address-card', Address::class)
+        ])->setPermission('ROLE_SUPER_ADMIN');
+        
 
 
 

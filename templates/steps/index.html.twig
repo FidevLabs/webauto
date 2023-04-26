@@ -20,7 +20,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
-                        <th>Email</th>
+                        {# <th>Email</th> #}
                         <th>Etat</th>
                         <th>Fichier</th>
                         <th>Categorie</th>
@@ -32,7 +32,7 @@
                         <tr>
                             <td>{{ step.id }}</td>
                             <td>{{ step.name }}</td>
-                            <td>{{ step.email }}</td>
+                            {# <td>{{ step.email }}</td> #}
                             <td>{% if step.state != null %}
                                     <span style="color:{{ step.state.color }};font-weight:bold;">{{ step.state.title }}</span>
                                 {% else %}
@@ -40,31 +40,25 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% for file in step.file %}
-                                    <a href="{{ asset('uploads/images/docs/'~ file) }}">Document</a><br/>
-                                {% endfor %}
+                                {% if step.file %}                                    
+                                    {% if step.file|length > 1 %}{{ step.file|length }} - Dossiers{% else %}{{ step.file|length }} - Dossier{% endif %}
+                                {% endif %}
                             </td>
                             <td>{{ step.category.name }}</td>
                             <td>
-                                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Actions
+                                <button type="button" data-href="/fr/admin?routeName=app_steps" {% if step.price == null %}disabled{% endif %} class="actionSendMail btn "
+                                    data-id="{{ step.id }}" 
+                                    data-email="{{ step.email }}"
+                                    data-price="{{ step.price }}">
+                                    <i class="fa fa-envelope"></i> Email
                                 </button>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a data-href="/fr/admin?routeName=app_steps" {% if step.price == null %}disabled{% endif %} type="button" class="actionSendMail dropdown-item"
-                                            data-id="{{ step.id }}" 
-                                            data-email="{{ step.email }}"
-                                            data-price="{{ step.price }}">
-                                            <i class="fa fa-envelope"></i> Email
-                                        </a>
-                                        <a data-href="/fr/admin?routeName=app_steps" {% if step.price == null %}disabled{% endif %} type="button" class="actionSendMail dropdown-item"
-                                            data-id="{{ step.id }}" 
-                                            data-email="{{ step.email }}"
-                                            data-price="{{ step.price }}">
-                                            <i class="fa fa-money"></i> Ajouter prix
-                                        </a>
-                                    </li>
-                                </ul>
+                                
+                                <button class="btn newstepsrequest" data-route="{{ path('app_addrequest') }}" data-idrequest="{{ step.id }}" data-bs-target="#exampleModalToggle" data-bs-toggle="modal"><i class="fa fa-car-side"></i> Nouvelle demande</button>
+                                
+                                <a href="{% if step.archive %}{{ asset('uploads/zip/'~ step.archive) }}{% else %}#{% endif %}"  class="btn {% if step.archive == null %}disabled{% endif %}"
+                                    >
+                                    <i class="fa fa-download"></i> Télécharger les dossiers
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -73,6 +67,84 @@
             </table>
         </div>
     </div>
+
+    {# Mdal start #}
+    <div class="modal fade" id="exampleModalToggle" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalToggleLabel"><i class="fa fa-car-side text-danger"></i> Nouvelle demande</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form>
+                        <table class="table">
+                            <tr>
+                                <td class="col-4">Nom et Prénoms:</td>
+                                <td class="h6">...</td>
+                            </tr>
+                            <tr>
+                                <td>Agence en charge :</td>
+                                <td class="text-bold">...</td>
+                            </tr>
+                            <tr>
+                                <td>Email :</td>
+                                <td class="text-bold">...</td>
+                            </tr>
+                            <tr>
+                                <td>Téléphone :</td>
+                                <td class="text-bold">...</td>
+                            </tr>
+                        </table>
+                    <hr class="border border-danger border-1 opacity-75">
+                        <div class="input-group mb-3">
+                            <label class="input-group-text p-3" for="inputGroupSelect01">Catégorie</label>
+                            <select class="form-select" id="inputGroupSelect01">
+                                <option selected>Choisisser...</option>
+                                {% for categorie in categories %}
+                                    <option value="{{ categorie.id }}">{{ categorie.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <input type="file" class="form-control" multiple id="inputGroupFile02">
+                            <label class="input-group-text p-3" for="inputGroupFile02">Dossier</label>
+                        </div>
+                        <div class="input-group mb-3">                            
+                            <label class="input-group-text p-3" for="inputGroupFile02">Coût de prestation</label>
+                            <input type="text" class="form-control" id="inputGroupFile02">
+                        </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-info disabled" data-bs-target="#exampleModalToggle2" data-bs-toggle="modal"><i class="fa fa-save"></i> Enregistrer</button>
+                <button class="btn btn-danger" data-bs-dismiss="modal"><i class="fa fa-close"></i> Annuler</button>
+            </div>
+            </div>
+        </div>
+        </div>
+        <div class="modal fade" id="exampleModalToggle2" aria-hidden="true" aria-labelledby="exampleModalToggleLabel2" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalToggleLabel2"><i class="fa fa-info text-warning"></i> Confirmation</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Demande envoyé !
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" data-bs-target="#exampleModalToggle" data-bs-toggle="modal">Back to first</button>
+            </div>
+            </div>
+        </div>
+    </div>
+        {# <button class="btn btn-primary" data-bs-target="#exampleModalToggle" data-bs-toggle="modal">Open first modal</button> #}
+
+    {# Modal end #}
 
 {% endblock %}
 
@@ -97,6 +169,20 @@
                     }
                 });
                 
+            });
+
+            $('.newstepsrequest').click(function () {
+                let idRequest = $(this).data('idrequest');
+                let href = $(this).data('route');
+
+                $.ajax({
+                    url: href,
+                    dataType: 'json',
+                    data: 'idrequest='+idRequest,
+                    success: function (response) {           
+                        alert(response.name);
+                    }
+                });
             });
             
         });

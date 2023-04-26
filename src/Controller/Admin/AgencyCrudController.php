@@ -17,7 +17,7 @@ class AgencyCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
         return [
-            IdField::new('id')->hideOnDetail(),
+            IdField::new('id')->hideOnForm()->hideOnDetail(),
             TextField::new('name'),
             BooleanField::new('active', 'Disponible'),
 

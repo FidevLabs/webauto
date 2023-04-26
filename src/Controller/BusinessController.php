@@ -53,9 +53,9 @@ class BusinessController extends AbstractController
     {
         $client = 2;
 
-        $clients = $user->findBy(['actor' => $client]);
-        $new_request = $stepsrequest->findBy(['state' => null]);
-        $current_request = $stepsrequest->findBy(['price' => null]);
+        $clients = $user->findBy(['actor' => $client, 'agency' => $this->getUser()->getAgency()]);
+        $new_request = $stepsrequest->findBy(['state' => null, 'agency' => $this->getUser()->getAgency()]);
+        $current_request = $stepsrequest->findBy(['price' => null, 'agency' => $this->getUser()->getAgency()], ['id' => 'desc'], 5, 0);
 
         $categories = $category->findAll();
 

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Actor;
 use App\Entity\User;
 use App\Form\RegistrationFormType;
 use App\Security\EmailVerifier;
@@ -34,6 +35,7 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
         $roles = ['ROLE_SUPER_ADMIN'];
         $agency_name = $request->get('_agency');
+        $actor = $entityManager->getRepository(Actor::class)->find(1);
 
         //dd($request->get('_agency'));
 
@@ -51,6 +53,7 @@ class RegistrationController extends AbstractController
 
             $user->setAgency($agency);
             $user->setRoles($roles);
+            $user->setActor($actor);
 
             $entityManager->persist($user);
             $entityManager->flush();

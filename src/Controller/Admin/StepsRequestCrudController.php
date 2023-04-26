@@ -30,15 +30,16 @@ class StepsRequestCrudController extends AbstractCrudController
 
     
 
-    public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
-{      
+    public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder {
+
         if ($this->getUser()->getRoles() == array('ROLE_USER') || $this->getUser()->getRoles() == array('ROLE_ADMIN')) {
             return parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters)
-                ->andWhere('entity.agency = :agency')
-                ->setParameter('agency', $this->getUser()->getAgency());
+                            ->andWhere('entity.agency = :agency')
+                            ->setParameter('agency', $this->getUser()->getAgency());
         } else {
             return parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
         }
+
     }
 
 
@@ -61,7 +62,7 @@ class StepsRequestCrudController extends AbstractCrudController
 
                 TelephoneField::new('phone', 'Téléphone')->setColumns(6)->hideOnIndex(),
 
-                EmailField::new('email', 'Adresse email')->setColumns(6),               
+                EmailField::new('email', 'Adresse email')->setColumns(6)->hideOnIndex(),               
 
                 AssociationField::new('category', 'Type')->setQueryBuilder(
                                     function (QueryBuilder $queryBuilder) {
@@ -73,23 +74,28 @@ class StepsRequestCrudController extends AbstractCrudController
                                     $queryBuilder->where('entity.active = true');
                                 })->onlyOnIndex()->setColumns(6),
 
-                ImageField::new('file', 'Dossier en (pdf)')
+                ImageField::new('file', 'Ajouter les dossiers en format (pdf)')
                             ->setBasePath(self::DOCS_BASE_PATH)
                             ->setUploadDir(self::DOCS_UPLOAD_DIR)
                             ->setUploadedFileNamePattern('[year]-[month]-[day]-[contenthash].[extension]')
                             ->setFormTypeOption('multiple', true)
                             ->setRequired(false)
-                            ->setSortable(false)->hideOnIndex()->setColumns(6),
+                            ->setSortable(false)->hideOnIndex()->setColumns(6),                               
 
-                DateTimeField::new('createdAt', 'Date d\'entrée')->hideOnForm(),
-
-                NumberField::new('price', 'Facturation')->hideWhenCreating(),
+                IntegerField::new('presta_price', 'Prix de prestation (€)')->setColumns(3),
                             //->setPermission('ROLE_ADMIN'),
+
+                IntegerField::new('price', 'Prix de démarche')->hideWhenCreating()->setColumns(3),
+                            //->setPermission('ROLE_ADMIN'),
+
+                DateTimeField::new('createdAt', 'Date d\'entrée')->hideOnForm(), 
+
+                TextField::new('reference', 'N° du Dossier')->onlyWhenUpdating()->setColumns(3),
 
                 AssociationField::new('state', 'Etat du dossier')->setQueryBuilder(
                     function (QueryBuilder $queryBuilder) {
                     $queryBuilder->where('entity.active = true');
-                })->onlyWhenUpdating()->setColumns(6),
+                })->hideWhenCreating()->setColumns(2),
 
                 //TextEditorField::new('comment', 'Ajouter un commentaire')->hideOnForm()->setColumns(6),
         ];

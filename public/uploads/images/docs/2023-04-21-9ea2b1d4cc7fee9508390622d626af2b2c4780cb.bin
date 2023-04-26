@@ -1,0 +1,3 @@
+; Wordfence WAF
+auto_prepend_file = '/homepages/29/d755784328/htdocs/clickandbuilds/webautodemarches/wordfence-waf.php'
+; END Wordfence WAF

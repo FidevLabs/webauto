@@ -8,7 +8,7 @@
     label, .title {color: #ffff;}
 </style>
 
-<section class="vh-100"style="padding-top: 3%;background-color: #525252;" >
+<section class="vh-100"style="padding-top: 5%;background-color: #525252;" >
   <div class="container-fluid h-custom">
     <div class="row d-flex justify-content-center align-items-center h-100" style="padding-top: 5%">
       <div class="col-md-9 col-lg-6 col-xl-5">
@@ -59,23 +59,21 @@
                     <label for="inputPassword">Mot de passe</label>
                 </div>
 
-                <input type="hidden" name="_csrf_token"
-                    value="{{ csrf_token('authenticate') }}"
-                >
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}" >
 
-                {#
-                    Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
-                    See https://symfony.com/doc/current/security/remember_me.html
+                
+                    {# Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
+                    See https://symfony.com/doc/current/security/remember_me.html #}
 
                     <div class="checkbox mb-3">
                         <label>
-                            <input type="checkbox" name="_remember_me"> Remember me
+                            <input type="checkbox" name="_remember_me"> Rester connecté
                         </label>
                     </div>
-                #}
+                
 
                 <button class="btn btn-primary btn-block mb-4" type="submit">
-                    Connexion
+                    Connecter
                 </button>
 
                 

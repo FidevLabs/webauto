@@ -49,6 +49,12 @@ class StepsRequest
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $reference = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $presta_price = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $archive = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -182,6 +188,30 @@ class StepsRequest
     public function setReference(?string $reference): self
     {
         $this->reference = $reference;
+
+        return $this;
+    }
+
+    public function getPrestaPrice(): ?int
+    {
+        return $this->presta_price;
+    }
+
+    public function setPrestaPrice(?int $presta_price): self
+    {
+        $this->presta_price = $presta_price;
+
+        return $this;
+    }
+
+    public function getArchive(): ?string
+    {
+        return $this->archive;
+    }
+
+    public function setArchive(?string $archive): self
+    {
+        $this->archive = $archive;
 
         return $this;
     }

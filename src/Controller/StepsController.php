@@ -12,7 +12,9 @@ use App\Repository\StepsRequestRepository;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Bridge\Twig\Mime\{TemplatedEmail, Email};
 use Doctrine\ORM\EntityManagerInterface;
-use App\Entity\{Address, Category, Agency};
+use App\Entity\{Address, Category, Agency, ClientMessage, StepsRequest};
+use Symfony\Component\Serializer\Encoder\JsonDecode;
+use Symfony\Component\Serializer\Encoder\JsonEncode;
 
 class StepsController extends AbstractController
 {
@@ -20,28 +22,34 @@ class StepsController extends AbstractController
     public function index(StepsRequestRepository $steps, Request $request, EntityManagerInterface $em): Response
     {
         $stepsList = $steps->findAll();
+        $categories = $em->getRepository(Category::class)->findAll();
 
         $email = $em->getRepository(Address::class)->findOneByIsActived(1);
 
-
+        /**
+         * Cette requete Ajax envoi le mail au client 
+         */
         if ($request->isXmlHttpRequest()) {
-
+            
             $current_step = $request->get('idstep');
             $stepRequest = $steps->find($current_step);
 
             $requestCategory = $em->getRepository(Category::class)->find($stepRequest->getId());
 
-            $stepRequest->getName();
+            
             $date = $stepRequest->getCreatedAt();
+            $client_message = $em->getRepository(ClientMessage::class)->findBy(['agency' => $this->getUser()->getAgency(), 'active' => true]);
             
             //dd($stepRequest->getName());
+
+            ($client_message)? $client_message : $client_message = 'Bonjour, votre dossier est prêt, le traitement a été avec succès';
 
             $to = $request->get('email');
 
             $subject = 'Suivi de dossier | WebAutoDemarche';
             
             $headers[] = 'MIME-Version: 1.0';
-            $headers[] = 'Content-type: text/html; charset=iso-8859-1';
+            $headers[] = 'Content-type: text/html; charset=UTF-8';
             
             $message = '
                         <html>
@@ -50,38 +58,38 @@ class StepsController extends AbstractController
                             </head>
                             <body>
                                 <div style="font-size: 1.1em">
-                                    Bonjour, votre dossier est prêt, le traitement a été avec succès.<br/>
+                                    '.$client_message.'.<br/>
 
                                     <br/>
 
-                                    Détail du dossier :
+                                    Détails du dossier :
                                 </div>
 
                                 <br/>
                                 <div>
                                     <table class="table">
                                         <tr>
-                                            <th>Intitulé :</th>
-                                            <td class="text-bold"></td>
+                                            <th style="text-align: left;">Intitulé :</th>
+                                            <td class="text-bold">'.$stepRequest->getName().'</td>
                                         </tr>
                                         <tr>
-                                            <th>Numéro de demande :</th>
+                                            <th style="text-align: left;">Numéro de demande :</th>
                                             <td class="text-bold">...</td>
                                         </tr>
                                         <tr>
-                                            <th>Date d\'émission :</th>
+                                            <th style="text-align: left;">Date d\'émission :</th>
                                             <td class="text-bold">'.date_format($date, 'd-m-Y H:i:s' ).'</td>
                                         </tr>
                                         <tr>
-                                            <th>Type de demande :</th>
+                                            <th style="text-align: left;">Type de demande :</th>
                                             <td class="text-bold">'.$requestCategory->getName().'</td>
                                         </tr>
                                         <tr>
-                                            <th>Prix :</th>
-                                            <td class="text-bold">'.$stepRequest->getPrice().'</td>
+                                            <th style="text-align: left;">Prix :</th>
+                                            <td class="text-bold">'.$stepRequest->getPrice().' € </td>
                                         </tr>                                        
                                     </table>
-
+                                    <br/><br/>
                                         Merci de prendre contact avec l\'agence pour plus d\'informations.
 
                                     <br/><br/>
@@ -104,6 +112,20 @@ class StepsController extends AbstractController
 
         return $this->render('steps/index.html.twig', [
             'steps' => $stepsList,
+            'categories' => $categories,
         ]);
+    }
+
+    #[Route('/addRequest', name:'app_addrequest')]
+    public function newRequest(Request $request, EntityManagerInterface $em) {
+
+        if ($request->isXmlHttpRequest()) {
+
+            $idreq = $request->get('idrequest');
+
+            $stepsReq = $em->getRepository(StepsRequest::class)->find($idreq);
+
+            return  new JsonEncode();
+        }
     }
 }
