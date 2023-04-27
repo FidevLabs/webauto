@@ -74,14 +74,6 @@ class StepsRequestCrudController extends AbstractCrudController
                                     $queryBuilder->where('entity.active = true');
                                 })->onlyOnIndex()->setColumns(6),
 
-                ImageField::new('file', 'Ajouter les dossiers en format (pdf)')
-                            ->setBasePath(self::DOCS_BASE_PATH)
-                            ->setUploadDir(self::DOCS_UPLOAD_DIR)
-                            ->setUploadedFileNamePattern('[year]-[month]-[day]-[contenthash].[extension]')
-                            ->setFormTypeOption('multiple', true)
-                            ->setRequired(false)
-                            ->setSortable(false)->hideOnIndex()->setColumns(6),                               
-
                 IntegerField::new('presta_price', 'Prix de prestation (€)')->setColumns(3),
                             //->setPermission('ROLE_ADMIN'),
 
@@ -95,7 +87,15 @@ class StepsRequestCrudController extends AbstractCrudController
                 AssociationField::new('state', 'Etat du dossier')->setQueryBuilder(
                     function (QueryBuilder $queryBuilder) {
                     $queryBuilder->where('entity.active = true');
-                })->hideWhenCreating()->setColumns(2),
+                })->hideWhenCreating()->setColumns(3),
+
+                ImageField::new('file', 'Ajouter les dossiers en format (pdf)')
+                            ->setBasePath(self::DOCS_BASE_PATH)
+                            ->setUploadDir(self::DOCS_UPLOAD_DIR)
+                            ->setUploadedFileNamePattern('[year]-[month]-[day]-[contenthash].[extension]')
+                            ->setFormTypeOption('multiple', true)
+                            ->setRequired(false)
+                            ->setSortable(false)->hideOnIndex()->setColumns(6),
 
                 //TextEditorField::new('comment', 'Ajouter un commentaire')->hideOnForm()->setColumns(6),
         ];

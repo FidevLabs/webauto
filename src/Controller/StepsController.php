@@ -125,7 +125,19 @@ class StepsController extends AbstractController
 
             $stepsReq = $em->getRepository(StepsRequest::class)->find($idreq);
 
-            return  new JsonEncode();
+            return new Response(json_encode(['name' => $stepsReq->getName(), 
+                                'phone' => $stepsReq->getPhone(),
+                                'email' => $stepsReq->getEmail(),
+                                'agence' => $stepsReq->getAgency()->getName()]));
+        }
+    }
+
+    #[Route('/addStep', name:'app_addsteprequest')]
+    public function addStep(Request $request, EntityManagerInterface $em) {
+
+        if ($request->isXmlHttpRequest()) {
+
+            return new Response($request);
         }
     }
 }

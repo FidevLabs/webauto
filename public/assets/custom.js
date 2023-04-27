@@ -1,5 +1,5 @@
 function VoirImg(Limg) {
-    LeHtml="<img border=0  width='400' src='"+Limg+"'style='box-shadow: 3px 3px 2.1em black;border-radius:5px;position: absolute;top: 50%;left: 50%;z-index: 200' >";
+    LeHtml="<img border=0  width='300' src='"+Limg+"'style='box-shadow: 3px 3px 2.1em black;border-radius:5px;position: absolute;top: 40%;left: 60%;' >";
     
     if (document.layers) {
       document.layers["MonDiv"].document.write(LeHtml);
@@ -33,10 +33,10 @@ function VoirImg(Limg) {
           document.write("<LAYER name='MonDiv' top=10 left=100 visibility='hide'></LAYER>");
       }
       if (document.all) {
-          document.write("<div id='MonDiv' style='position:absolute;top:41%;left:58%;visibility:hidden'></div>");
+          document.write("<div id='MonDiv' style='position:fixed;top:31%;left:58%;visibility:hidden;z-index: 99999999 !important'></div>");
       }
       else if (document.getElementById) {
-          document.write("<div id='MonDiv' style='position:absolute;top:41%;left:58%;visibility:hidden'></div>");
+          document.write("<div id='MonDiv' style='position:fixed;top:31%;left:58%;visibility:hidden;z-index: 99999999 !important'></div>");
       }
   }
 

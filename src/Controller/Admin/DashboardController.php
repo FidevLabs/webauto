@@ -67,6 +67,8 @@ class DashboardController extends AbstractDashboardController
             MenuItem::linkToRoute('Gestion', 'fa fa-sliders', 'app_steps')->setPermission('ROLE_SUPER_ADMIN'),
         ]);
 
+        yield MenuItem::linkToRoute('Générateur PDF', 'fa fa-file-pdf', 'app_pdf_generator')->setPermission('ROLE_SUPER_ADMIN');
+
         yield MenuItem::linkToCrud('Les agences', 'fa fa-handshake-o text-warning', Agency::class)->setPermission('ROLE_ADMIN');
 
         //yield MenuItem::linkToRoute('Statistiques', 'fa fa-bar-chart', 'app_business')->setPermission('ROLE_SUPER_ADMIN');
