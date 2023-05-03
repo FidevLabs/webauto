@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\StepsRequest;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\{Response, Request};
+use Symfony\Component\HttpFoundation\{Response};
 use Symfony\Component\Routing\Annotation\Route;
 use Dompdf\Dompdf;
 

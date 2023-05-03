@@ -13,15 +13,25 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Bridge\Twig\Mime\{TemplatedEmail, Email};
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\{Address, Category, Agency, ClientMessage, StepsRequest};
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use App\Form\StepsRequestType;
+use App\Service\ZipFile;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 class StepsController extends AbstractController
 {
+    public const PATH_DOCS = 'uploads/images/docs/';
+    public const PATH_ZIP = 'uploads/zip/';
+
+    public function __construct(private ZipFile $zip){}
+
     #[Route('/steps', name: 'app_steps')]
-    public function index(StepsRequestRepository $steps, Request $request, EntityManagerInterface $em): Response
+    public function index(SluggerInterface $slugger, AdminUrlGenerator $adminUrlGenerator, StepsRequestRepository $steps, Request $request, EntityManagerInterface $em): Response
     {
-        $stepsList = $steps->findAll();
+        $stepsList = $steps->findBy(array(),  ['id' => 'desc'], 10, 0);
         $categories = $em->getRepository(Category::class)->findAll();
 
         $email = $em->getRepository(Address::class)->findOneByIsActived(1);
@@ -108,11 +118,69 @@ class StepsController extends AbstractController
 
             }
         
+        $stepsRequest = new StepsRequest;
+
+        $form = $this->createForm(StepsRequestType::class, $stepsRequest);
+
+        $form->handleRequest($request);
+       
+
+        if ($form->isSubmitted()) {
+
+            $files = $form->get('files')->getData();
+
+            $name = $request->get('_name');
+            $agency =  $request->get('_agence');
+            $email = $request->get('_email');
+            $phone = $request->get('_phone');
+
+            $agency = $em->getRepository(Agency::class)->findOneByName($agency);
+
+           
+
+            $stepsRequest->setName($name);
+            $stepsRequest->setEmail($email);
+            $stepsRequest->setPhone($phone);
+            $stepsRequest->setAgency($agency);            
+            $stepsRequest->setCreatedAt(new \DateTimeImmutable());    
             
+            $zip_name = microtime(true);
+
+            if ($files) {
+                for ($i=0;$i < count($files);$i++) {
+
+                    $originalFilename []= pathinfo($files[$i]->getClientOriginalName(), PATHINFO_FILENAME);
+                    // this is needed to safely include the file name as part of the URL
+                    $safeFilename []= $slugger->slug($originalFilename[$i]);
+                    $newFilename []= $safeFilename[$i].'-'.uniqid().'.'.$files[$i]->guessExtension();
+
+                    try {
+                        $files[$i]->move(
+                            $this->getParameter('doc_dir'),
+                            $newFilename[$i]
+                        );
+                    } catch (FileException $e) {
+                        // ... handle exception if something happens during file upload
+                    }
+
+                    $stepsRequest->setFile($newFilename);
+                }
+            }
+
+            $em->persist($stepsRequest);
+            $em->flush();
+            
+        }
+        
+        $url =  $adminUrlGenerator
+                    ->setRoute('app_addsteprequest')
+                    ->generateUrl();
 
         return $this->render('steps/index.html.twig', [
             'steps' => $stepsList,
             'categories' => $categories,
+            'url' => $url,
+            'form' => $form->createView(),
         ]);
     }
 
@@ -132,12 +200,24 @@ class StepsController extends AbstractController
         }
     }
 
-    #[Route('/addStep', name:'app_addsteprequest')]
-    public function addStep(Request $request, EntityManagerInterface $em) {
+    public function ziperFile($files, $pathfile): void {
 
-        if ($request->isXmlHttpRequest()) {
+        $i = 0 ;
 
-            return new Response($request);
+        while ( count( $files ) > $i )   {
+            $fo = fopen(self::PATH_DOCS.$files[$i],'r') ; //on ouvre le fichier
+            $contenu = fread($fo, filesize(self::PATH_DOCS.$files[$i])) ; //on enregistre le contenu
+            fclose($fo) ; //on ferme fichier
+            $this->zip->addfile($contenu, $files[$i]) ; //on ajoute le fichier
+            $i++; //on incrémente i
         }
+
+        $archive = $this->zip->file() ; // on associe l'archive
+        // on enregistre l'archive dans un fichier
+        $open = fopen( $pathfile , "wb");
+        fwrite($open, $archive);
+        fclose($open);
+
     }
+
 }

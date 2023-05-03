@@ -8,17 +8,14 @@
 
 
 {% block main %}
-    <style>
-        .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-        .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-    </style>
-    
+
+        
     <div class="container">
         <div class="row">
             <table class="table datagrid"> 
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        {# <th>ID</th> #}
                         <th>Name</th>
                         {# <th>Email</th> #}
                         <th>Etat</th>
@@ -30,7 +27,7 @@
                 <tbody>
                     {% for step in steps %}
                         <tr>
-                            <td>{{ step.id }}</td>
+                            {# <td>{{ step.id }}</td> #}
                             <td>{{ step.name }}</td>
                             {# <td>{{ step.email }}</td> #}
                             <td>{% if step.state != null %}
@@ -93,52 +90,61 @@
             </div>
 
             <div class="modal-body">
-                <form id="form-request" method="post" enctype="multipart/form-data">
+                {{ form_start(form) }}
                         <table class="table">
                             <tr>
                                 <td class="col-4">Nom et Prénoms:</td>
                                 <td id="name" class="h6">...</td>
+                                <input type="hidden" name="_name" id="inputname" value=""/>
                             </tr>
                             <tr>
                                 <td>Agence en charge :</td>
                                 <td id="agence" class="h6">...</td>
+                                <input type="hidden" name="_agence" id="inputagence" value="" />
                             </tr>
                             <tr>
                                 <td>Email :</td>
                                 <td id="email" class="h6">...</td>
+                                <input type="hidden" name="_email" id="inputemail" value="" />
                             </tr>
                             <tr>
                                 <td>Téléphone :</td>
                                 <td id="phone" class="h6">...</td>
+                                <input type="hidden" name="_phone" id="inputphone" value="" />
                             </tr>
                         </table>
                     <hr class="border border-danger border-1 opacity-75">
                         <div class="input-group mb-3">
-                            <label class="input-group-text p-3" for="inputGroupSelect01">Catégorie</label>
+                            {# <label class="input-group-text p-3" for="inputGroupSelect01">Catégorie</label>
                             <select name="_category" class="form-select" id="inputGroupSelect01">
                                 <option selected>Choisisser...</option>
                                 {% for categorie in categories %}
                                     <option value="{{ categorie.id }}">{{ categorie.name }}</option>
                                 {% endfor %}
-                            </select>
+                            </select> #}
+
+                            {{ form_row(form.category) }}
                         </div>
 
                         <div class="input-group mb-3">
-                            <input type="file" name="_files[]" class="form-control" multiple id="inputGroupFile02">
-                            <label class="input-group-text p-3" for="inputGroupFile02">Dossier</label>
+                            {# <input type="file" name="_file" class="form-control" multiple id="files">
+                            <label class="input-group-text p-3" for="inputGroupFile02">Dossier</label> #}
+
+                            {{ form_row(form.files) }}
                         </div>
-                        <div id="response"></div>
-                        <ul id="image-list"></ul>
 
                         <div class="input-group mb-3">                            
-                            <label class="input-group-text p-3" for="inputGroupFile02">Coût de prestation</label>
-                            <input type="text" name="_prestation" class="form-control" id="inputGroupFile02">
+                            {# <label class="input-group-text p-3" for="inputGroupFile02">Coût de prestation</label>
+                            <input type="text" name="_prestation" class="form-control" id="inputGroupFile02"> #}
+
+                            {{ form_row(form.presta_price) }}
                         </div>
-                </form>
+
+                {{ form_end(form) }}
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-info disabled" id="btnsubmit" data-bs-target="#exampleModalToggle2" data-bs-toggle=""><i class="fa fa-save"></i> Enregistrer</button>
+                <button class="btn btn-info " id="btnsubmit" data-bs-target="#exampleModalToggle2" data-bs-toggle=""><i class="fa fa-save"></i> Enregistrer</button>
                 <button class="btn btn-danger" data-bs-dismiss="modal"><i class="fa fa-close"></i> Annuler</button>
             </div>
             </div>
@@ -199,32 +205,23 @@
                     data: 'idrequest='+idRequest,
                     success: function (response) {  
                         $('#name').text(response.name);
+                        $('#inputname').val(response.name);
+
                         $('#email').text(response.email);
+                        $('#inputemail').val(response.email);
+
                         $('#phone').text(response.phone); 
+                        $('#inputphone').val(response.phone); 
+
                         $('#agence').text(response.agence); 
+                        $('#inputagence').val(response.agence); 
                     }
                 });
             });
 
 
             $('#btnsubmit').on('click', function () {
-                $('#form-request').trigger('submit');
-            })
-
-            $('#form-request').on('submit', function (e) {
-                e.preventDefault();
-
-                var formData = new FormData(this);
-                var href = "{{ path('app_addsteprequest') }}";
-
-                $.ajax({
-                    url: href,
-                    dataType: 'text',
-                    data: 'formData='+formData,
-                    success: function (response) {  
-                        alert(response);
-                    }
-                });
+                $('form').trigger('submit');
             });
 
         });
