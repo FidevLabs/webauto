@@ -63,17 +63,17 @@ class DashboardController extends AbstractDashboardController
 
         yield MenuItem::subMenu('Demandes', 'fa fa-paperclip text-info')->setSubItems([
             MenuItem::linkToCrud('Liste', 'fa fa-list', StepsRequest::class),            
-            MenuItem::linkToCrud('Catégorie', 'fa fa-tag', Category::class)->setPermission('ROLE_SUPER_ADMIN'),
             MenuItem::linkToRoute('Gestion', 'fa fa-sliders', 'app_steps')->setPermission('ROLE_SUPER_ADMIN'),
         ]);
-
-        yield MenuItem::linkToRoute('Générateur PDF', 'fa fa-file-pdf', 'app_pdf_generator')->setPermission('ROLE_SUPER_ADMIN');
 
         yield MenuItem::linkToCrud('Les agences', 'fa fa-handshake-o text-warning', Agency::class)->setPermission('ROLE_ADMIN');
 
         //yield MenuItem::linkToRoute('Statistiques', 'fa fa-bar-chart', 'app_business')->setPermission('ROLE_SUPER_ADMIN');
 
         yield MenuItem::linkToCrud('Liste des états', 'fa fa-eye text-dark', State::class)->setPermission('ROLE_SUPER_ADMIN');
+
+        yield MenuItem::linkToCrud('Catégorie', 'fa fa-tag', Category::class)->setPermission('ROLE_SUPER_ADMIN');
+
         yield MenuItem::linkToCrud('Comptes', 'fa fa-users text-success', User::class)->setPermission('ROLE_SUPER_ADMIN');
         
         yield MenuItem::linkToCrud('Moyen de paiement', 'fa fa-money-bill', Payment::class)->setPermission('ROLE_SUPER_ADMIN');

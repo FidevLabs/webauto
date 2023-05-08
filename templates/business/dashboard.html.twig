@@ -177,7 +177,7 @@
                                                     <td>{{ request.name }}</td>
                                                     <td>{{ request.email }}</td>
                                                     <td>{{ request.category.name }}</td>
-                                                    <td>{% if request.state %}<span style="{{ request.state.color}}">{{ request.state.title }}</span>{% else %}<span class="badge badge-warning">En attente</span>{% endif %}</td>
+                                                    <td>{% if request.state %}<span style="padding:3%;color: {{ request.state.color }}">{{ request.state.title }}</span>{% else %}<span class="badge badge-warning">En attente</span>{% endif %}</td>
                                                     <td>{{ 'Le '~request.createdAt|date('d/m/Y à h:i:s') }}</td>
                                                     {# <td>
                                                         <a href="#">Voir détails</a>

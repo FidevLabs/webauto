@@ -133,18 +133,17 @@ class StepsController extends AbstractController
             $agency =  $request->get('_agence');
             $email = $request->get('_email');
             $phone = $request->get('_phone');
+            $prestaPrice = $request->get('_prestation');
 
             $agency = $em->getRepository(Agency::class)->findOneByName($agency);
-
-           
 
             $stepsRequest->setName($name);
             $stepsRequest->setEmail($email);
             $stepsRequest->setPhone($phone);
-            $stepsRequest->setAgency($agency);            
+            $stepsRequest->setAgency($agency);
+            $stepsRequest->setPrestaPrice($prestaPrice);            
             $stepsRequest->setCreatedAt(new \DateTimeImmutable());    
             
-            $zip_name = microtime(true);
 
             if ($files) {
                 for ($i=0;$i < count($files);$i++) {
@@ -166,10 +165,19 @@ class StepsController extends AbstractController
                     $stepsRequest->setFile($newFilename);
                 }
             }
-
+            $forms = $form->getData();
             $em->persist($stepsRequest);
+            $em->persist($forms);
             $em->flush();
             
+            $url = $adminUrlGenerator
+                    ->setRoute('app_steps')
+                    ->generateUrl();
+
+            $this->addFlash('notice', 'Votre nouvelle demande a été ajouté !');
+            
+            return $this->redirect($url);
+
         }
         
         $url =  $adminUrlGenerator

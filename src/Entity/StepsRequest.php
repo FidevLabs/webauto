@@ -32,9 +32,6 @@ class StepsRequest
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $comment = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 4, scale: 0, nullable: true)]
-    private ?string $price = null;
-
     #[ORM\ManyToOne(inversedBy: 'stepsRequests')]
     private ?State $state = null;
 
@@ -50,10 +47,16 @@ class StepsRequest
     private ?string $reference = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $presta_price = null;
+    private ?float $presta_price = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $archive = null;
+
+    #[ORM\ManyToOne(inversedBy: 'stepsRequests')]
+    private ?Payment $payment = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $price = null;
 
     public function getId(): ?int
     {
@@ -132,17 +135,6 @@ class StepsRequest
         return $this;
     }
 
-    public function getPrice(): ?string
-    {
-        return $this->price;
-    }
-
-    public function setPrice(?string $price): self
-    {
-        $this->price = $price;
-
-        return $this;
-    }
 
     public function getState(): ?State
     {
@@ -192,12 +184,12 @@ class StepsRequest
         return $this;
     }
 
-    public function getPrestaPrice(): ?int
+    public function getPrestaPrice(): ?float
     {
         return $this->presta_price;
     }
 
-    public function setPrestaPrice(?int $presta_price): self
+    public function setPrestaPrice(?float $presta_price): self
     {
         $this->presta_price = $presta_price;
 
@@ -212,6 +204,30 @@ class StepsRequest
     public function setArchive(?string $archive): self
     {
         $this->archive = $archive;
+
+        return $this;
+    }
+
+    public function getPayment(): ?Payment
+    {
+        return $this->payment;
+    }
+
+    public function setPayment(?Payment $payment): self
+    {
+        $this->payment = $payment;
+
+        return $this;
+    }
+
+    public function getPrice(): ?float
+    {
+        return $this->price;
+    }
+
+    public function setPrice(?float $price): self
+    {
+        $this->price = $price;
 
         return $this;
     }

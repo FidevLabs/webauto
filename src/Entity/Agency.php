@@ -24,7 +24,7 @@ class Agency
     #[ORM\OneToMany(mappedBy: 'agency', targetEntity: StepsRequest::class, orphanRemoval: true)]
     private Collection $stepsRequests;
 
-    #[ORM\OneToMany(mappedBy: 'agency', targetEntity: User::class)]
+    #[ORM\OneToMany(mappedBy: 'agency', targetEntity: User::class, orphanRemoval: true)]
     private Collection $users;
 
     #[ORM\OneToMany(mappedBy: 'agency', targetEntity: Address::class, orphanRemoval: true)]

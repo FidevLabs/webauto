@@ -31,11 +31,19 @@ class StepsRequestCrudController extends AbstractCrudController
     
 
     public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder {
+        
+        if ($this->getUser()->getRoles() == array('ROLE_USER') && $this->getUser()->getActor()->getName() == 'Client') {
+           
+            return parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters)
+                            ->andWhere('entity.email = :email')
+                            ->setParameter('email', $this->getUser()->getEmail());
 
-        if ($this->getUser()->getRoles() == array('ROLE_USER') || $this->getUser()->getRoles() == array('ROLE_ADMIN')) {
+        } else if ($this->getUser()->getRoles() == array('ROLE_ADMIN')) {
+
             return parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters)
                             ->andWhere('entity.agency = :agency')
                             ->setParameter('agency', $this->getUser()->getAgency());
+
         } else {
             return parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
         }
@@ -54,7 +62,6 @@ class StepsRequestCrudController extends AbstractCrudController
     public function configureFields(string $pageName): iterable
     {
 
-        $user = $this->security->getUser();
             
         return [
                 //IdField::new('id')->hideOnForm(),
@@ -74,10 +81,10 @@ class StepsRequestCrudController extends AbstractCrudController
                                     $queryBuilder->where('entity.active = true');
                                 })->onlyOnIndex()->setColumns(6),
 
-                IntegerField::new('presta_price', 'Prix de prestation (€)')->setColumns(3),
+                NumberField::new('presta_price', 'Prix de prestation (€)')->setColumns(3),
                             //->setPermission('ROLE_ADMIN'),
 
-                IntegerField::new('price', 'Prix de démarche')->hideWhenCreating()->setColumns(3),
+                NumberField::new('price', 'Prix du: Permis / Carte grise')->hideWhenCreating()->setColumns(3),
                             //->setPermission('ROLE_ADMIN'),
 
                 DateTimeField::new('createdAt', 'Date d\'entrée')->hideOnForm(), 
@@ -88,6 +95,9 @@ class StepsRequestCrudController extends AbstractCrudController
                     function (QueryBuilder $queryBuilder) {
                     $queryBuilder->where('entity.active = true');
                 })->hideWhenCreating()->setColumns(3),
+
+                AssociationField::new('payment', 'Moyen de paiement')
+                                                        ->setColumns(3),
 
                 ImageField::new('file', 'Ajouter les dossiers en format (pdf)')
                             ->setBasePath(self::DOCS_BASE_PATH)
@@ -107,7 +117,7 @@ class StepsRequestCrudController extends AbstractCrudController
 
         if (!$entityInstance instanceof StepsRequest) return;
 
-        $user = $this->security->getUser();
+        $user = $this->getUser();        
 
         $entityInstance->setCreatedAt(new \DateTimeImmutable());
 

@@ -5,20 +5,24 @@ namespace App\EventSubscriber;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityPersistedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityUpdatedEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use App\Entity\{Product, Category, StepsRequest, Agency, Address};
+use App\Entity\{Actor, Product, Category, StepsRequest, Agency, Address, User};
 use App\Service\ZipFile;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
 use Symfony\Component\BrowserKit\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Security;
 
 class AdminSubscriber implements  EventSubscriberInterface {
 
     public const PATH_DOCS = 'uploads/images/docs/';
-
     public const PATH_ZIP = 'uploads/zip/';
 
-    public function __construct( private ZipFile $zip, private Security $security, private EntityManagerInterface $entityManager){}
+    public function __construct( private ZipFile $zip, 
+                                private Security $security, 
+                                private EntityManagerInterface $entityManager,
+                                private UserPasswordHasherInterface $userPasswordHasher){
+                                }
 
     public static function getSubscribedEvents() {
 
@@ -56,10 +60,49 @@ class AdminSubscriber implements  EventSubscriberInterface {
                         $subject,
                         $destinataires
                     );
+
+            /**
+             * Creation du compte de l'utilisateur
+             */
+            $username     = $entityInstance->getName();
+            $usermail     = $entityInstance->getEmail();
+            $userphone    = $entityInstance->getPhone();
+            $useractor    = $this->entityManager->getRepository(Actor::class)->findOneByName('Client');
+            $roles        = ['ROLE_USER'];
+
+            $user = new User;
+
+            $passhasher = $this->userPasswordHasher;
+
+            $user->setName($username);
+            $user->setNickname(' ');
+            $user->setEmail($usermail);
+            $user->setActor($useractor);
+            $user->setAgency($this->security->getUser()->getAgency());
+            $user->setRoles($roles);
+            $user->setPassword(
+                $passhasher->hashPassword(
+                    $user,
+                    $userphone
+                )
+            );
+
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+
             
-            $body = 'Vos dossier ont été ajoutés et est sont en attente d’approbation par les agents. <br/> Merci de rester en contact !';
+            $body = 'Vos dossiers ont été ajoutés et sont en attente d’approbation par les agents.<br />
+                    Vous pouvez suivre les démarche en vous connectant avec les identifiant suivant:  
+                        ------------
+                        ------------
+                        Login : '.$entityInstance->getEmail() .'----
+                        Mot de passe : '.$entityInstance->getPhone().'
+                        
+                        ------------
+                        
+                        Merci de rester en contact !';
             // Email pour le client
-            mail($entityInstance->getName(), $subject, $body);
+            mail($usermail, $subject, $body);
         }
 
         $entityInstance->setCreatedAt(new \DateTimeImmutable());
@@ -101,7 +144,7 @@ class AdminSubscriber implements  EventSubscriberInterface {
                 $subject = 'Notification du dossier :'.$entityInstance->getCategory()->getName();;
                 
                 $headers[] = 'MIME-Version: 1.0';
-                $headers[] = 'Content-type: text/html; charset=iso-8859-1';
+                $headers[] = 'Content-type: text/html; charset=utf-8';
                 
                 $message = '
                             <html>
@@ -142,7 +185,7 @@ class AdminSubscriber implements  EventSubscriberInterface {
                                             </tr>                                        
                                         </table>
 
-                                            Merci de prendre contact avec l\'agence pour plus d\'informations.
+                                            Merci de rester en contact.
 
                                         <br/><br/>
                                         Cordialement.                                    
@@ -181,7 +224,7 @@ class AdminSubscriber implements  EventSubscriberInterface {
 
         //défini la première partie du mail
         $texte .= "--".$limite."\n"; 
-        $texte .= "Content-Type: text/html; charset=\"iso-8859-1\"\n"; 
+        $texte .= "Content-Type: text/html; charset=\"utf-8\" \n"; 
         $texte .= "Content-Transfer-Encoding: quoted-printable\n ";
         $texte .= "Content-Disposition: inline \n\n ";
         $texte .= $mailMessage;
@@ -252,16 +295,7 @@ class AdminSubscriber implements  EventSubscriberInterface {
         //on ferme ensuite toutes les parties du mail
         $attachement .= "\n\n--".$limite."--\n\n";
 
-        if ( mail($destinataire,$subject,$texte.$attachement,$mail_mime) ) 
-        {
-            //on affiche un message indiquant l'envoi du message
-            echo '<p align="left"><font color="green"face="Arial, Helvetica, sans-serif">Demande envoyée </font></p>';
-        }
-            else 
-        {
-            //on affiche un message indiquant l'echec de l'envoi du message	
-            echo '<p align="left"><font color="red" face="Arial, Helvetica, sans-serif"> Echec de l\'envoi de la demande</font></p>';
-        }
+        mail($destinataire,$subject,$texte.$attachement,$mail_mime);
 
     }
 

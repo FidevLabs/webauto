@@ -30,6 +30,7 @@ class PdfGeneratorController extends AbstractController
             'category'     => $stepRequest->getCategory()->getName(),
             'prestation'   => $stepRequest->getPrestaPrice(),
             'agency'       => $stepRequest->getAgency()->getName(),
+            'payment'       => $stepRequest->getPayment()->getName(),
         ];
 
         $html =  $this->renderView('pdf_generator/index.html.twig', $data);

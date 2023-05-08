@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Category;
+use App\Entity\Payment;
 use App\Entity\StepsRequest;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -35,8 +36,8 @@ class StepsRequestType extends AbstractType
                         ])
                     ]
                 ])
-            ->add('presta_price', IntegerType::class, ['label' => 'Prix de prestation'])
             ->add('category', EntityType::class, ['label' => 'Catégorie', 'class' => Category::class, 'choice_label' => 'name'])
+            ->add('payment', EntityType::class, ['label' => 'Paiement : ', 'class' => Payment::class, 'choice_label' => 'name'])
         ;
     }
 
