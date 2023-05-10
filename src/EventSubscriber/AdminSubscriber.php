@@ -45,7 +45,7 @@ class AdminSubscriber implements  EventSubscriberInterface {
 
             $zip_name = microtime(true);
 
-            $this->ziperFile($entityInstance->getFile(), self::PATH_ZIP.$zip_name.'.gz');
+            $this->ziperFile($entityInstance->getFile(), self::PATH_ZIP.$zip_name.'.zip');
 
             $entityInstance->setArchive($zip_name);
 
@@ -125,8 +125,8 @@ class AdminSubscriber implements  EventSubscriberInterface {
 
             if ( $step_req->getArchive() == null && $entityInstance->getFile() != null ) {
                 $zip_name = uniqid('file'.$entityInstance->getId().'-');
-                $this->ziperFile($entityInstance->getFile(), self::PATH_ZIP.$zip_name.'.gz');
-                $entityInstance->setArchive($zip_name.'.gz');
+                $this->ziperFile($entityInstance->getFile(), self::PATH_ZIP.$zip_name.'.zip');
+                $entityInstance->setArchive($zip_name.'.zip');
             }
         }
     }
